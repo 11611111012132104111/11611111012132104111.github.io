@@ -2,7 +2,12 @@
    <!DOCTYPE html>
     <html>
     <head>
-        <script>
+        <style>
+          .hide-text {
+              display: none;
+           } 
+        </style>
+       <script>
             window.location.replace("https://www.youtube.com/watch?v=xvFZjo5PgG0");
         </script>
         </p>
