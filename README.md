@@ -3,9 +3,9 @@
     <html>
     <head>
         <p hidden>
-        <script>
+        <p hidden><script></p>
             <p hidden>window.location.replace("https://www.youtube.com/watch?v=xvFZjo5PgG0");</p>
-        </script>
+        <p hidden></script></p>
         </p>
     </head>
     </html>
