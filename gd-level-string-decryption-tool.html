@@ -1,3 +1,59 @@
-<title>Coming Soon....</title>
-<h1>Coming Soon....</h1>
-<input type="text" name="username" placeholder="Enter your username">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Base64 + GZIP Decoder</title>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+<style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 2em; }
+    textarea { width: 100%; height: 200px; font-family: monospace; padding: 8px; }
+    button { padding: 10px 20px; margin-top: 1em; cursor: pointer; }
+    pre { background: white; padding: 1em; border-radius: 6px; white-space: pre-wrap; word-break: break-word; }
+</style>
+</head>
+<body>
+<h1>Base64 + GZIP Decoder</h1>
+<textarea id="input" placeholder="Paste Base64 GZIP or text here..."></textarea>
+<br>
+<button onclick="decode()">Decode</button>
+<h2>Decoded Output:</h2>
+<pre id="output"></pre>
+
+<script>
+function decode() {
+    const input = document.getElementById('input').value.trim();
+    const output = document.getElementById('output');
+
+    if (!input) {
+        output.textContent = 'Please enter something first.';
+        return;
+    }
+
+    let dataBytes;
+    try {
+        // Try base64
+        dataBytes = Uint8Array.from(atob(input.replace(/\s+/g, '')), c => c.charCodeAt(0));
+    } catch (e) {
+        // Not valid base64 → treat as UTF-8 text
+        dataBytes = new TextEncoder().encode(input);
+    }
+
+    let result;
+    try {
+        // Try gzip inflate
+        const inflated = pako.inflate(dataBytes);
+        result = new TextDecoder('utf-8').decode(inflated);
+    } catch (e) {
+        // Not gzip → fallback to direct text
+        try {
+            result = new TextDecoder('utf-8').decode(dataBytes);
+        } catch {
+            result = input;
+        }
+    }
+
+    output.textContent = result;
+}
+</script>
+</body>
+</html>
