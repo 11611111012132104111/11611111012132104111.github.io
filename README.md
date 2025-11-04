@@ -3,7 +3,7 @@
     <html>
     <head>
        <script>
-            window.location.replace("https://www.youtube.com/watch?v=xvFZjo5PgG0");
+            window.location.replace("icedblock173-cyber.github.io");
        </script>
     </head>
     </html>
