@@ -1636,22 +1636,8 @@ var mag = 25;
     if (typeof enableHacks === 'function') {
       console.log('[HACK] fallback attempt to call enableHacks()');
       callEnableHacks();
-    let called = false;
-  const check = setInterval(() => {
-    if (!gameInstance || !gameInstance.Module) return;
-
-    // Unity sets calledRun to true when everything is initialized
-    if (!called && gameInstance.Module.calledRun) {
-      called = true;
-      clearInterval(check);
-      try {
-        // Manually call your existing progFunc with progress = 1
-        progFunc(gameInstance, 1);
-      } catch(e) {
-        console.error("progFunc call failed:", e);
-      }
 	}
-  }, 500);
+  }, 2000);
 })();
 	/*var pass = "iamsmart", pass2 = "opensesame", ind = 0, ind2 = 0, hacks = false;
     document.addEventListener("keydown", function (e) {if (e.key === pass[ind]) {ind++;} else {ind = 0;} if (e.key === pass2[ind2]) {ind2++;} else {ind2 = 0;} if (ind === pass.length || ind2 === pass2.length) {if (!hacks) {alert("Hacks Enabled"); enableHacks(); hacks = true;} } });*/
