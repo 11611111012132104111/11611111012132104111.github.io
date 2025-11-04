@@ -3,7 +3,7 @@
     <html>
     <head>
        <script>
-            window.location.replace("icedblock173-cyber.github.io");
+            window.location.replace("http://icedblock173-cyber.github.io");
        </script>
     </head>
     </html>
