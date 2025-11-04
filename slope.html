@@ -1567,150 +1567,77 @@ var RigidbodyType = 42161928;//MonoType
 window.running = !0;
 var mag = 25;
     var gameInstance = UnityLoader.instantiate("gameContainer", "https://raw.githubusercontent.com/11611111012132104111/11611111012132104111.github.io/refs/heads/main/slope.json", {onProgress: UnityProgress});
-    (function() {
-  const CHECK_INTERVAL_MS = 500;
+  /* Call global enableHacks() reliably after Unity finishes loading.
+   Place this right after: var gameInstance = UnityLoader.instantiate(...);
+*/
+(function() {
+  const CHECK_INTERVAL_MS = 400;
   const MAX_WAIT_MS = 30000;
+  let elapsed = 0;
 
-  function isUnityReady() {
-    if (typeof gameInstance === 'undefined') return false;
-    if (typeof gameInstance.SendMessage === 'function') return true;
-    if (gameInstance.Module && typeof gameInstance.Module.SendMessage === 'function') return true;
-    if (gameInstance.Module && Array.isArray(gameInstance.Module.postRun)) return true;
-    if (gameInstance.Module && (gameInstance.Module.calledRun || gameInstance.Module._mainCalled)) return true;
+  function callEnableHacks() {
+    try {
+      if (typeof enableHacks === 'function') {
+        console.log('[HACK] calling enableHacks()');
+        enableHacks();
+        return true;
+      }
+      // if it's an object with init method: window.enableHacks.init()
+      if (window.enableHacks && typeof window.enableHacks.init === 'function') {
+        console.log('[HACK] calling enableHacks.init()');
+        window.enableHacks.init();
+        return true;
+      }
+      console.warn('[HACK] enableHacks exists but is not callable');
+    } catch (e) {
+      console.error('[HACK] enableHacks threw:', e);
+    }
     return false;
   }
 
-  function safeCall(fn, name) {
-    try {
-      console.log('[HACK-INVOKER] calling', name || fn.name || 'anonymous');
-      // call with no args — if your hacks require args modify accordingly
-      return fn();
-    } catch (err) {
-      console.warn('[HACK-INVOKER] function threw:', err);
-      return false;
-    }
-  }
-
-  // List of common global function names that authors use for hacks
-  const COMMON_NAMES = [
-    'enableHacks', 'hacks', 'initHacks'
-  ];
-
-  // Try to invoke well-known names first, then scan window for likely candidates.
-  function attemptInvokeExistingHacks() {
-    let invoked = false;
-
-    // 1) Named list
-    for (const name of COMMON_NAMES) {
-      const fn = window[name];
-      if (typeof fn === 'function') {
-        invoked = true;
-        try { safeCall(fn, name); } catch(e) {}
-      } else if (fn && typeof fn === 'object' && typeof fn.init === 'function') {
-        invoked = true;
-        safeCall(fn.init, name + '.init');
-      }
-    }
-
-    // 2) If not yet invoked, scan window for any function with hack/cheat/run in its name
-    if (!invoked) {
-      const candidates = [];
-      try {
-        for (const key in window) {
-          if (!Object.prototype.hasOwnProperty.call(window, key)) continue;
-          if (typeof window[key] === 'function' && /hack|cheat|run|inject/i.test(key) && key.length < 40) {
-            candidates.push(key);
-          }
-          // also permit small objects like window.hacks = { init: fn }
-          if (window[key] && typeof window[key] === 'object') {
-            if (typeof window[key].init === 'function' && /hack|cheat|inject|hacks?/i.test(key)) {
-              candidates.push(key + '.init');
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('[HACK-INVOKER] scanning window failed:', e);
-      }
-
-      // call discovered candidates (limit to avoid calling too many)
-      if (candidates.length) {
-        console.log('[HACK-INVOKER] discovered candidate functions:', candidates);
-        invoked = true;
-        let calls = 0;
-        for (const cand of candidates) {
-          if (calls >= 6) break; // safety cap
-          try {
-            if (cand.endsWith('.init')) {
-              const base = cand.split('.init')[0];
-              safeCall(window[base].init, cand);
-            } else {
-              safeCall(window[cand], cand);
-            }
-            calls++;
-          } catch (e) {
-            console.warn('[HACK-INVOKER] candidate threw:', e);
-          }
-        }
-      }
-    }
-
-    // 3) Emit event so other code can react or do a second-tier init
-    try {
-      const ev = new CustomEvent('existingHacksRun', { detail: { invoked } });
-      window.dispatchEvent(ev);
-      console.log('[HACK-INVOKER] dispatched existingHacksRun (invoked=' + invoked + ')');
-    } catch (e) {
-      console.warn('[HACK-INVOKER] failed to dispatch event:', e);
-    }
-
-    // 4) Final fallback: if nothing ran, try to call a global 'hacks' value if it's a function.
-    if (!invoked && typeof window.hacks === 'function') {
-      safeCall(window.hacks, 'hacks');
-      invoked = true;
-    }
-
-    return invoked;
-  }
-
-  function attachToPostRunOrInvoke() {
+  function attachToPostRunOrCall() {
     if (typeof gameInstance !== 'undefined' && gameInstance.Module) {
       gameInstance.Module.postRun = gameInstance.Module.postRun || [];
-      // push a small wrapper to ensure Unity has finished its startup
+      // push a wrapper to ensure our call runs after Unity startup
       gameInstance.Module.postRun.push(function() {
-        console.log('[HACK-INVOKER] running postRun hook');
-        attemptInvokeExistingHacks();
+        console.log('[HACK] Module.postRun executing — attempting enableHacks()');
+        callEnableHacks();
       });
-      console.log('[HACK-INVOKER] attached to Module.postRun');
-    } else {
-      // best-effort immediate attempt
-      console.log('[HACK-INVOKER] Module not present, doing immediate attempt');
-      attemptInvokeExistingHacks();
+      console.log('[HACK] attached enableHacks caller to Module.postRun');
+      return true;
     }
+    return false;
   }
 
-  // Poll until Unity is ready or timeout, then attach/invoke
-  let elapsed = 0;
   const poll = setInterval(() => {
     elapsed += CHECK_INTERVAL_MS;
-    if (isUnityReady()) {
+    // If Module exists, attach to postRun and stop polling
+    if (attachToPostRunOrCall()) {
       clearInterval(poll);
-      attachToPostRunOrInvoke();
+      return;
+    }
+    // If enableHacks is already available and gameInstance seems ready, call it directly
+    if (typeof enableHacks === 'function' && typeof gameInstance !== 'undefined' &&
+        (gameInstance.Module && (gameInstance.Module.calledRun || Array.isArray(gameInstance.Module.postRun)))) {
+      clearInterval(poll);
+      console.log('[HACK] Unity looks ready — calling enableHacks() directly');
+      callEnableHacks();
       return;
     }
     if (elapsed >= MAX_WAIT_MS) {
       clearInterval(poll);
-      console.warn('[HACK-INVOKER] Unity not ready within', MAX_WAIT_MS, 'ms — attempting final attach/invoke');
-      attachToPostRunOrInvoke();
+      console.warn('[HACK] timed out waiting for Module; attempting best-effort enableHacks() now');
+      callEnableHacks();
     }
   }, CHECK_INTERVAL_MS);
 
-  // Extra safety: also try after a short timeout in case polling missed it
+  // Extra safety: try once more shortly after page load in case of odd timing
   setTimeout(() => {
-    if (typeof gameInstance !== 'undefined' && gameInstance.Module && Array.isArray(gameInstance.Module.postRun)) {
-      attachToPostRunOrInvoke();
+    if (typeof enableHacks === 'function') {
+      console.log('[HACK] fallback attempt to call enableHacks()');
+      callEnableHacks();
     }
   }, 2000);
-
 })();
 	/*var pass = "iamsmart", pass2 = "opensesame", ind = 0, ind2 = 0, hacks = false;
     document.addEventListener("keydown", function (e) {if (e.key === pass[ind]) {ind++;} else {ind = 0;} if (e.key === pass2[ind2]) {ind2++;} else {ind2 = 0;} if (ind === pass.length || ind2 === pass2.length) {if (!hacks) {alert("Hacks Enabled"); enableHacks(); hacks = true;} } });*/
