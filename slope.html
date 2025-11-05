@@ -1566,7 +1566,7 @@ var RigidbodyType = 42161928;//MonoType
 //derived from AddForce at 32002752
 window.running = !0;
 var mag = 25;
-    var gameInstance = UnityLoader.instantiate("gameContainer", "https://raw.githubusercontent.com/11611111012132104111/11611111012132104111.github.io/refs/heads/main/slope.json", {onProgress: progFunc, Module: {onRuntimeInitialized: function () {UnityProgress(gameInstance, "complete")}}});
+    var gameInstance = UnityLoader.instantiate("gameContainer", "https://raw.githubusercontent.com/11611111012132104111/11611111012132104111.github.io/refs/heads/main/slope.json", {onProgress: progFunc, Module: {onRuntimeInitialized: function () {UnityProgress(gameInstance, "complete")}}});window.gameInstance = gameInstance;
     /*var pass = "iamsmart", pass2 = "opensesame", ind = 0, ind2 = 0, hacks = false;
     document.addEventListener("keydown", function (e) {if (e.key === pass[ind]) {ind++;} else {ind = 0;} if (e.key === pass2[ind2]) {ind2++;} else {ind2 = 0;} if (ind === pass.length || ind2 === pass2.length) {if (!hacks) {alert("Hacks Enabled"); enableHacks(); hacks = true;} } });*/
     function enableHacks() {kp=false;var view = new Uint32Array(gameInstance.Module.wasmMemory.buffer); document.addEventListener("keydown", function (e) {if(e.key==="i"){kp=true;view[7674510]=0;}if(e.key==="Enter" && kp){kp=false;}if(kp){if(parseInt(e.key)!=NaN){
