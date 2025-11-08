@@ -27,10 +27,10 @@ async function getIP() {
         }
 
         document.getElementById('ip').innerText =
-            `Your IPv4 Address: ${ipv4Data.ip}\nYour IPv6 Address: ${ipv6Data.ip}`;
+            `Your IPv4 Address: ${ipv4}\nYour IPv6 Address: ${ipv6}`;
     } catch (error) {
         console.error('Error fetching IP address:', error);
-        document.getElementById('ip').innerText = 'Error fetching IP addresses.';
+        document.getElementById('ip').innerText = 'Error Loading....';
     }
 }
 
