@@ -1,4 +1,0 @@
-(function() { self.importScripts('https://web-static.archive.org/_static/wombatWorkers.js'); new WBWombat({'prefix': 'https://web.archive.org/web/', 'prefixMod': 'https://web.archive.org/web/wkrf_/', 'originalURL': 'https://cryptodude3.github.io/slope.html'}); })();this.require = function() { return {} }; this.decompress = function(e) { return e }; this.onmessage = function(e) {
-          var t = { id: e.data.id, decompressed: this.decompress(e.data.compressed) };
-          postMessage(t, t.decompressed ? [t.decompressed.buffer] : [])
-        }; postMessage({ ready: true });
