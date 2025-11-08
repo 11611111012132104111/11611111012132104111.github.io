@@ -1,1 +1,36 @@
-emptied
+<p id="ip">Fetching IP addresses...</p>
+
+<script>
+async function getIP() {
+    const ipElement = document.getElementById('ip');
+    ipElement.innerText = 'Fetching IP addresses...';
+
+    let ipv4 = 'None';
+    let ipv6 = 'None';
+
+    try {
+        // Fetch IPv4
+        const ipv4Response = await fetch('https://api.ipify.org?format=json');
+        const ipv4Data = await ipv4Response.json();
+        if (ipv4Data?.ip) ipv4 = ipv4Data.ip;
+    } catch {
+        console.warn('Could not fetch IPv4 address.');
+    }
+
+    try {
+        // Fetch IPv6
+        const ipv6Response = await fetch('https://api64.ipify.org?format=json');
+        const ipv6Data = await ipv6Response.json();
+        if (ipv6Data?.ip && ipv6Data.ip.includes(':')) {
+            ipv6 = ipv6Data.ip;
+        }
+    } catch {
+        console.warn('Could not fetch IPv6 address.');
+    }
+
+    // Display results
+    ipElement.innerText = `IPv4 Address: ${ipv4}\nIPv6 Address: ${ipv6}`;
+}
+
+getIP();
+</script>
