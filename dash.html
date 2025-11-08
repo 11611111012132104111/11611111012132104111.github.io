@@ -1,0 +1,23 @@
+<p id="ip">Fetching IP addresses...</p>
+
+<script>
+async function getIP() {
+    try {
+        // Fetch IPv4 address
+        const ipv4Response = await fetch('https://api.ipify.org?format=json');
+        const ipv4Data = await ipv4Response.json();
+
+        // Fetch IPv6 address
+        const ipv6Response = await fetch('https://api64.ipify.org?format=json');
+        const ipv6Data = await ipv6Response.json();
+
+        document.getElementById('ip').innerText =
+            `Your IPv4 Address: ${ipv4Data.ip}\nYour IPv6 Address: ${ipv6Data.ip}`;
+    } catch (error) {
+        console.error('Error fetching IP address:', error);
+        document.getElementById('ip').innerText = 'Error fetching IP addresses.';
+    }
+}
+
+getIP();
+</script>
